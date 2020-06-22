@@ -1,0 +1,90 @@
+# 参考https://www.cnblogs.com/molieren/articles/10674715.html
+# 分别采用z-score标准化和min-max标准化方法
+import numpy as np
+import numpy
+from os import listdir
+from sklearn.neighbors import KNeighborsClassifier as kNN
+from sklearn import datasets
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from datetime import datetime
+import gzip
+import sklearn.svm
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import GaussianNB
+from sklearn import tree
+import pickle
+
+
+def read_data(data_file):
+    import gzip
+    f = gzip.open(data_file, "rb")
+    Myunpickle = pickle._Unpickler(file = f, fix_imports=True, encoding="bytes", errors="strict")
+    train,val,test = Myunpickle.load()#train是一个由两个元素组成的元组，第一个元素是测试图片的额集合，为50000*784的矩阵，每一行表示一个数据，第二个元素是测试图片的标签
+    f.close()
+    train_x = train[0]
+    train_y = train[1]
+    test_x = test[0]
+    test_y = test[1]
+    return train_x, train_y, test_x, test_y
+
+# 获取数据，由于sklearn自带的数据集只有1797个样本，数据量不够大，因此这里下载了网上的数据集，训练集50000，测试集10000
+train_x, train_y, test_x, test_y=read_data('E:\python_resource\data\mnist.pkl.gz')
+
+
+# 采用 Z-Score 标准化
+ss = preprocessing.StandardScaler()
+train_ss_x = ss.fit_transform(train_x)
+test_ss_x = ss.transform(test_x)
+print("采用 Z-Score 标准化")
+
+# 创建 KNN 分类器
+knn = KNeighborsClassifier()
+knn.fit(train_ss_x, train_y)
+predict_y = knn.predict(test_ss_x)
+print("KNN 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
+# 创建 SVM 分类器
+svm = sklearn.svm.SVC()
+svm.fit(train_ss_x, train_y)
+predict_y=svm.predict(test_ss_x)
+print('SVM 准确率: %.2lf%%' % (accuracy_score(predict_y, test_y)*100))
+# 创建 贝叶斯 分类器
+mnb = GaussianNB()
+mnb.fit(train_ss_x, train_y)
+predict_y = mnb.predict(test_ss_x)
+print("朴素贝叶斯 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
+# 创建 决策树 分类器
+dtc = sklearn.tree.DecisionTreeClassifier()
+dtc.fit(train_ss_x, train_y)
+predict_y = dtc.predict(test_ss_x)
+print("决策树 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
+
+# 采用 Min-Max 标准化
+mm = preprocessing.MinMaxScaler()
+train_mm_x = mm.fit_transform(train_x)
+test_mm_x = mm.transform(test_x)
+print("采用 Min-Max 标准化")
+
+# 创建 KNN 分类器
+knn = KNeighborsClassifier()
+knn.fit(train_mm_x, train_y)
+predict_y = knn.predict(test_mm_x)
+print("KNN 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
+# 创建 SVM 分类器
+svm = sklearn.svm.SVC()
+svm.fit(train_mm_x, train_y)
+predict_y=svm.predict(test_mm_x)
+print('SVM 准确率: %.2lf%%' % (accuracy_score(predict_y, test_y)*100))
+# 创建 贝叶斯 分类器
+mnb = MultinomialNB()
+mnb.fit(train_mm_x, train_y)
+predict_y = mnb.predict(test_mm_x)
+print("朴素贝叶斯 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
+# 创建 决策树 分类器
+dtc = sklearn.tree.DecisionTreeClassifier()
+dtc.fit(train_mm_x, train_y)
+predict_y = dtc.predict(test_mm_x)
+print("决策树 准确率: %.2lf%%" % (accuracy_score(predict_y, test_y)*100))
